@@ -1,0 +1,125 @@
+@use '../styles/partials/variables';
+@use '../styles/partials/mixins';
+
+.banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    gap: 20px;
+    min-height: 100vh;
+    padding: 0px 20px;
+
+    .text {
+        @include mixins.flex_center($direction: column);
+
+        h1 {
+            font-family: variables.$heading-font;
+            font-size: 6em;
+            line-height: 1;
+            color: variables.$dark-green-color;
+        }
+
+        p {
+            max-width: 500px;
+            font-size: 1.2em;
+            color: variables.$green-color;
+        }
+    }
+
+    // .image {
+    //     --frame-width: 10px;
+    //     --frame-gap: 5px;
+
+    //     position: relative;
+    //     padding: var(--frame-width) var(--frame-width) var(--frame-width) 0px;
+    //     background-color: variables.$green-color;
+    //     border-radius: variables.$medium-border-radius;
+
+    //     &:before {
+    //         content: "";
+    //         position: absolute;
+    //         top: 0px;
+    //         left: 0px;
+    //         width: calc(100% / 3);
+    //         height: var(--frame-width);
+    //         background-color: variables.$light-green-color;
+    //     }
+
+    //     &:after {
+    //         content: "";
+    //         position: absolute;
+    //         bottom: 0px;
+    //         left: 0px;
+    //         width: calc(100% / 3);
+    //         height: var(--frame-width);
+    //         background-color: variables.$light-green-color;
+    //     }
+        
+    //     img {
+    //         display: block;
+    //         max-width: 500px;
+    //         width: 100%;
+    //         padding: var(--frame-gap) var(--frame-gap) var(--frame-gap) 0px;
+    //         background-color: variables.$light-green-color;
+    //         border-radius: 0px variables.$medium-border-radius variables.$medium-border-radius 0px;
+    //     }
+    // }
+
+    .image {
+        --frame-width: 10px;
+        --frame-gap: 5px;
+      
+        position: relative;
+        display: inline-block;
+        width: 100%;
+        max-width: 500px;
+        padding: var(--frame-width) var(--frame-width) var(--frame-width) 0px;
+        background-color: variables.$green-color;
+        border-radius: variables.$medium-border-radius;
+        transition: transform 0.3s ease;
+
+        &:hover {
+            transform: translateY(-5px);
+            cursor: pointer;
+        
+            &::before {
+                width: 50%;
+            }
+
+            &::after {
+                width: 25%;
+            }
+        }
+
+        &::before,
+        &::after {
+            content: "";
+            position: absolute;
+            left: 0px;
+            width: calc(100% / 3);
+            height: var(--frame-width);
+            background-color: variables.$light-green-color;
+            transition: width 0.3s ease;
+        }
+      
+        &::before {
+            top: 0px;
+            border-top-left-radius: variables.$medium-border-radius;
+        }
+      
+        &::after {
+            bottom: 0px;
+            border-bottom-left-radius: variables.$medium-border-radius;
+        }
+      
+        img {
+            display: block;
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+            padding: var(--frame-gap) var(--frame-gap) var(--frame-gap) 0px;
+            background-color: variables.$light-green-color;
+            border-radius: 0px variables.$medium-border-radius variables.$medium-border-radius 0px;
+        }
+    }
+}

@@ -1,0 +1,44 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Clothing {
+  id          Int       @id @default(autoincrement())
+  title       String    @db.VarChar(20)
+  description String    @db.VarChar(200)
+  category    Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  categoryId  Int?      @map("category_id")
+  price       Int       @default(0)
+  image       String
+
+  @@map("clothing")
+}
+
+model FilterGroup {
+  id         Int        @id @default(autoincrement())
+  name       String     @unique @db.VarChar(50)
+  categories Category[]
+
+  @@map("filter_group")
+}
+
+model Category {
+  id       Int          @id @default(autoincrement())
+  group    FilterGroup? @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  groupId  Int?         @map("group_id")
+  name     String       @unique @db.VarChar(50)
+  icon     String       @default("fa-solid fa-list") @db.VarChar(100)
+  clothing Clothing[]
+
+  @@map("category")
+}
