@@ -104,16 +104,16 @@
     padding: 10px 0px;
     text-align: center;
     font-weight: 600;
-    background-color: $orange-color;
+    background-color: $dark-green-color;
     color: $secondary-color;
-    border: 1px solid $light-yellow-color;
+    border: 1px solid $light-green-color;
     border-radius: $border-radius;
     transition: transform 0.2s ease, background-color 0.2s ease;
 
     &:hover,
     &:focus-visible {
         transform: translateY(-2px);
-        background-color: lighten($orange-color, 5%);
+        background-color: lighten($dark-green-color, 5%);
         cursor: pointer;
     }
     
@@ -130,15 +130,15 @@
     padding: 10px 0px;
     text-align: center;
     font-weight: 600;
-    background-color: $yellow-color;
-    color: $orange-color;
-    border: 1px solid $orange-color;
+    background-color: $green-color;
+    color: $light-green-color;
+    border: 1px solid $light-green-color;
     border-radius: $border-radius;
     transition: transform 0.2s ease, background-color 0.2s ease;
     
     &:hover {
         transform: translateY(-2px);
-        background-color: lighten($yellow-color, 2%);
+        background-color: lighten($green-color, 2%);
         cursor: pointer;
     }
     
@@ -217,8 +217,8 @@
 
     &:focus-visible {
         background-color: $secondary-color;
-        border-color: $orange-color;
-        box-shadow: 0 0 0 3px transparentize($orange-color, 0.8);
+        border-color: $green-color;
+        box-shadow: 0 0 0 3px transparentize($green-color, 0.8);
     }
 
     &:-webkit-autofill {

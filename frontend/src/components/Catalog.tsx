@@ -1,10 +1,8 @@
-import { useState, useEffect } from "react"
 // @ts-ignore
 import "./Catalog.scss"
+import { useState, useEffect } from "react"
 
-const BACKEND_URL = "http://localhost:5000"
-
-interface ClothingData {
+export interface ClothingData {
     id:number,
     title:string,
     description:string,
@@ -20,7 +18,13 @@ interface ClothingData {
     }
 }
 
-export default function Catalog() {
+interface CatalogProps {
+    addToCart:(id:number) => void
+}
+
+const BACKEND_URL = "http://localhost:5000" // Defines The Back-End URL
+
+export default function Catalog({ addToCart }:CatalogProps) {
     const [clothing, setClothing] = useState<ClothingData[]>([]) // Stores The Clothing
     const [loading, setLoading] = useState<boolean>(true) // Checks If Is Loading
     const [error, setError] = useState<string|null>(null) // Stores The Error
@@ -67,8 +71,15 @@ export default function Catalog() {
                         <p className="description">{one_clothing.description}</p>
 
                         <div className="bottom">
-                            <p className="price">{one_clothing.price}<span>€</span></p>
-                            <button className="add_to_cart" title="Pridať do košíka" aria-label="Pridať do košíka"><i className="fa-solid fa-basket-shopping"></i> Pridať</button> {/* https://fontawesome.com/icons/basket-shopping */}
+                            <p className="price">{(one_clothing.price / 100).toFixed(2).replace(".", ",")}<span>€</span></p>
+                            <button 
+                                className="add_to_cart" 
+                                title="Pridať do košíka" 
+                                aria-label="Pridať do košíka"
+                                onClick={() => addToCart(one_clothing.id)}
+                            >
+                                <i className="fa-solid fa-basket-shopping"></i> Pridať {/* https://fontawesome.com/icons/basket-shopping */}
+                            </button>
                         </div>
                     </article>
                 ))}
