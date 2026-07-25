@@ -33,22 +33,24 @@ enum DayOfWeek {
 model OpeningHour {
   id                Int       @id @default(autoincrement())
   day_of_week       Int       @unique @default(1)
-  open_time         DateTime
-  close_time        DateTime
+  open_time         String   @db.VarChar(5) // Uloží napr. "08:00"
+  close_time        String   @db.VarChar(5) // Uloží napr. "20:00"
   is_closed_all_day Boolean   @default(false)
 
   @@map("opening_hour")
 }
 
 model Clothing {
-  id          Int       @id @default(autoincrement())
-  title       String    @db.VarChar(20)
-  description String    @db.VarChar(200)
-  category    Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  categoryId  Int?      @map("category_id")
-  price       Int       @default(0)
-  image       String
+  id              Int       @id @default(autoincrement())
+  title           String    @db.VarChar(20)
+  description     String    @db.VarChar(200)
+  category        Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  categoryId      Int?      @map("category_id")
+  price           Int       @default(0)
+  image           String
   modifier_groups ClothingModifierGroup[]
+  order_items     OrderItem[]
+  ratings         Rating[]
 
   @@map("clothing")
 }
@@ -74,11 +76,11 @@ model Category {
 
 model ClothingModifierGroup {
   id                 Int                    @id @default(autoincrement())
+  clothing_id        Int
+  clothing           Clothing               @relation(fields: [clothing_id], references: [id], onDelete: Cascade)
   title              String                 @db.VarChar(100)
   is_multiple_choice Boolean                @default(false)
   is_required        Boolean                @default(true)
-  clothing_id        Int
-  clothing           Clothing               @relation(fields: [clothing_id], references: [id], onDelete: Cascade)
   items              ClothingModifierItem[]
 
   @@map("clothing_modifier_group")
@@ -86,237 +88,68 @@ model ClothingModifierGroup {
 
 model ClothingModifierItem {
   id          Int                   @id @default(autoincrement())
-  title       String                @db.VarChar(100)
-  extra_price Int                   @default(0)
   group_id    Int
   group       ClothingModifierGroup @relation(fields: [group_id], references: [id], onDelete: Cascade)
+  title       String                @db.VarChar(100)
+  extra_price Int                   @default(0)
 
   @@map("clothing_modifier_item")
 }
 
-// class Order(models.Model):
-//     STATUS_CHOICES = (
-//         ("PENDING", "Čaká na platbu"),
-//         ("PAID", "Zaplatená"),
-//         ("PREPARING", "Pripravuje sa"),
-//         ("DELIVERING", "Na ceste"),
-//         ("COMPLETED", "Doručená"),
-//         ("CANCELLED", "Zrušená")
-//     )
+enum OrderStatus {
+  PENDING
+  PAID
+  PREPARING
+  DELIVERING
+  COMPLETED
+  CANCELLED
+}
 
-//     tracking_code = models.CharField(
-//         verbose_name="Sledovací kód",
-//         help_text="Sledovací kód objednávky.",
-//         max_length=6, 
-//         unique=True, 
-//         blank=True,
-//         editable=False
-//     )
+model Order {
+  id               Int         @id @default(autoincrement())
+  tracking_code    String      @unique @db.VarChar(6)
+  first_name       String      @db.VarChar(20)
+  last_name        String      @db.VarChar(50)
+  address          String      @db.VarChar(100)
+  city             String      @db.VarChar(50)
+  phone_number     String      @db.VarChar(50)
+  message          String?     @db.VarChar(250)
+  price            Int         @default(0)
+  total_price      Int         @default(0)
+  status           OrderStatus @default(PENDING)
+  stripe_intent_id String?     @unique @db.VarChar(255)
+  cash_on_delivery Boolean     @default(false)
+  creation_time    DateTime    @default(now())
+  items            OrderItem[]
+  ratings          Rating[]
 
-//     first_name = models.CharField(
-//         verbose_name="Meno", 
-//         help_text="Meno zákazníka.",
-//         max_length=20, 
-//         null=False
-//     )
+  @@map("order")
+}
 
-//     last_name = models.CharField(
-//         verbose_name="Priezvisko", 
-//         help_text="Priezvisko zákazníka.",
-//         max_length=50, 
-//         null=False
-//     )
+model OrderItem {
+  id                Int       @id @default(autoincrement())
+  order_id          Int
+  order             Order     @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  clothing_id       Int?
+  clothing          Clothing? @relation(fields: [clothing_id], references: [id], onDelete: SetNull)
+  quantity          Int       @default(1)
+  price_at_purchase Int       @default(0)
+  is_tip            Boolean   @default(false)
 
-//     address = models.CharField(
-//         verbose_name="Adresa", 
-//         help_text="Adresa doručenia.",
-//         max_length=100, 
-//         null=False
-//     )
+  @@map("order_item")
+}
 
-//     city = models.CharField(
-//         verbose_name="Mesto", 
-//         help_text="Mesto adresy doručenia.",
-//         max_length=50, 
-//         null=False
-//     )
+model Rating {
+  id            Int      @id @default(autoincrement())
+  order_id      Int
+  order         Order    @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  clothing_id   Int
+  clothing      Clothing @relation(fields: [clothing_id], references: [id], onDelete: Cascade)
+  rating        Int      @default(1)
+  creation_time DateTime @default(now())
 
-//     phone_number = models.CharField(
-//         verbose_name="Telefónne číslo", 
-//         help_text="Telefónne číslo zákazníka.",
-//         max_length=50, 
-//         null=False
-//     )
-
-//     message = models.TextField(
-//         verbose_name="Správa", 
-//         help_text="Dodatočná správa / poznámka.",
-//         max_length=100, 
-//         null=True, 
-//         blank=True
-//     )
-
-//     price = models.PositiveIntegerField(
-//         verbose_name="Cena", 
-//         help_text="Cena objednávky v centoch (bez prepitného).",
-//         default=0, 
-//         null=False
-//     )
-
-//     total_price = models.PositiveIntegerField(
-//         verbose_name="Celková cena", 
-//         help_text="Celková cena objednávky v centoch (vrátane prepitného).",
-//         default=0, 
-//         null=False
-//     )
-
-//     status = models.CharField(
-//         verbose_name="Stav objednávky", 
-//         help_text="Aktuálny stav objednávky.", 
-//         max_length=20, 
-//         choices=STATUS_CHOICES, 
-//         default="PENDING", 
-//         null=False
-//     )
-
-//     stripe_intent_id = models.CharField(
-//         verbose_name="Stripe ID", 
-//         help_text="ID transakcie v službe Stripe.",
-//         max_length=255, 
-//         unique=True, 
-//         null=True
-//     )
-
-//     cash_on_delivery = models.BooleanField(
-//         verbose_name="Na dobierku", 
-//         help_text="Informácia o tom, či vybraná objednávka bude vyplatená na dobierku alebo kartou.",
-//         default=False, 
-//         null=False
-//     )
-    
-//     creation_time = models.DateTimeField(
-//         verbose_name="Čas vytvorenia",
-//         help_text="Čas vytvorenia objednávky.", 
-//         auto_now_add=True,
-//         null=False
-//     )
-
-//     class Meta:
-//         verbose_name = "Objednávka"
-//         verbose_name_plural = "Objednávky"
-
-//     def save(self, *args, **kwargs):
-//         if not self.tracking_code:
-//             new_tracking_code = generate_tracking_code()
-            
-//             # Generates The Unique Tracking Code
-//             while Order.objects.filter(tracking_code=new_tracking_code).exists():
-//                 new_tracking_code = generate_tracking_code()
-                
-//             self.tracking_code = new_tracking_code
-
-//         super().save(*args, **kwargs)
-
-//     def __str__(self):
-//         return f"Objednávka #{self.tracking_code} - {self.last_name} ({self.get_status_display()})"
-
-// class OrderItem(models.Model):
-//     order = models.ForeignKey(
-//         Order, 
-//         verbose_name="Objednávka",
-//         help_text="Objednávka ktorej patrí daná položka.", 
-//         on_delete=models.CASCADE,
-//         related_name="items", 
-//         null=False
-//     )
-    
-//     dish = models.ForeignKey(
-//         Dish, 
-//         verbose_name="Jedlo",
-//         help_text="Jedlo ktorému zodpovedá vybraná položka.", 
-//         on_delete=models.SET_NULL, 
-//         null=True,
-//         blank=True
-//     )
-
-//     quantity = models.PositiveIntegerField(
-//         verbose_name="Množstvo", 
-//         help_text="Množstvo položiek.",
-//         default=1, 
-//         null=False
-//     )
-    
-//     price_at_purchase = models.PositiveIntegerField(
-//         verbose_name="Cena pri objednaní", 
-//         help_text="Cena za položku v centoch v čase vytvorenia objednávky (vrátane zľavy).",
-//         default=0, 
-//         null=False
-//     )
-
-//     is_tip = models.BooleanField(
-//         verbose_name="Je prepitné", 
-//         help_text="Informácia o tom, či vybraná položka je prepitné (inak je produkt).",
-//         default=False, 
-//         null=False
-//     )
-
-//     class Meta:
-//         verbose_name = "Položka objednávky"
-//         verbose_name_plural = "Položky objednávky"
-
-//     def __str__(self):
-//         dish_name = self.dish.title if self.dish else "Zmazané jedlo"
-//         return f"{self.quantity}x {dish_name} (Objednávka #{self.order.id})"
-
-// class Rating(models.Model):
-//     order = models.ForeignKey(
-//         Order, 
-//         verbose_name="Objednávka",
-//         help_text="Objednávka ktorej vybrané hodnotenie patrí.", 
-//         on_delete=models.CASCADE,
-//         related_name="ratings", 
-//         null=False
-//     )
-    
-//     dish = models.ForeignKey(
-//         Dish, 
-//         verbose_name="Jedlo",
-//         help_text="Jedlo ktorému vybrané hodnotenie patrí.", 
-//         on_delete=models.CASCADE, 
-//         related_name="ratings",
-//         null=False
-//     )
-
-//     rating = models.PositiveIntegerField(
-//         verbose_name="Hodnotenie", 
-//         help_text="Hodnotenie od 1 do 5.", 
-//         validators=[MinValueValidator(1), MaxValueValidator(5)],
-//         default=1, 
-//         null=False
-//     )
-
-//     # comment = models.TextField(
-//     #     verbose_name="Comment", 
-//     #     help_text="Comment content.", 
-//     #     max_length=100, 
-//     #     null=True,
-//     #     blank=True
-//     # )
-
-//     creation_time = models.DateTimeField(
-//         verbose_name="Čas pridania",
-//         help_text="Čas pridania hodnotenia.", 
-//         auto_now_add=True,
-//         null=False
-//     )
-
-//     class Meta:
-//         verbose_name = "Hodnotenie jedla"
-//         verbose_name_plural = "Hodnotenie jedál"
-//         unique_together = ("dish", "order")
-
-//     def __str__(self):
-//         return f"{self.dish.title} - {self.rating} hviezdičiek" if self.rating > 1 else f"{self.dish.title} - {self.rating} hviezdička"
+  @@map("rating")
+}
 
 model ContactMessage {
   id            Int      @id @default(autoincrement())

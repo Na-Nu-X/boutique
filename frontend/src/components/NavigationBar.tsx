@@ -3,9 +3,19 @@ import "./NavigationBar.scss"
 import { useState, Dispatch, SetStateAction, useRef, useEffect } from "react"
 import { CartItem } from "../App.tsx"
 
-import type { ClothingData } from "./Catalog.tsx"
+import type { ClothingResponse, Clothing } from "./Catalog.tsx"
 
-interface CartProductDetail extends ClothingData {
+interface StatusResponse {
+  success:boolean,
+  message:string,
+  is_open?:boolean,
+  status?:string,
+  reason?:string
+  open_till?:string,
+  next_open?:string
+}
+
+interface CartProductDetail extends Clothing {
   quantity:number
 }
 
@@ -16,6 +26,13 @@ interface Customer {
   city:string,
   phone_number:string,
   message:string|null
+}
+
+interface ValidateCouponResponse {
+  success:string,
+  message:string,
+  code?:string,
+  discount_percent?:number
 }
 
 interface NavigationBarProps {
@@ -38,15 +55,10 @@ export default function NavigationBar({ cart, setCart }:NavigationBarProps) {
           body: ""
         })
 
-        const data = await response.json() // Gets The Data
+        const status_response:StatusResponse = await response.json() // Gets The Status Response
 
-        if(data && data.success && data.status) {
-          setIsOpen(data.is_open || false) // Sets The Information If Is Open
-        } 
-        
-        else {
-          console.error(data.message) // Shows The Error Message
-        }
+        if(status_response && status_response.success && status_response.status) setIsOpen(status_response.is_open || false) // Sets The Information If Is Open
+        else console.error(status_response.message) // Shows The Error Message
       }
       
       catch(error) {
@@ -60,11 +72,6 @@ export default function NavigationBar({ cart, setCart }:NavigationBarProps) {
   const [is_cart_open, setIsCartOpen] = useState<boolean>(false) // Checks If The Cart Is Open
   const [cart_items, setCartItems] = useState<CartProductDetail[]>([]) // Stores The Cart Items
   const [loading, setLoading] = useState<boolean>(true) // Checks If Is Loading
-
-  const total_cart_items:number = cart.reduce((sum, item) => sum + item.quantity, 0) // Gets The Total Amount Of The Cart Items
-
-  const cart_modal_ref:React.RefObject<HTMLDialogElement|null> = useRef<HTMLDialogElement>(null) // Gets The Cart Modal Ref
-
   const [current_index, setCurrentIndex] = useState<number>(0) // Stores The Current Index Of Active Item In Cart
   const [coupon_code, setCouponCode] = useState<string>("") // Stores The Entered Coupon Code
   const [applied_coupon, setAppliedCoupon] = useState<string|null>(null) // Stores The Applied Coupon Code
@@ -88,6 +95,9 @@ export default function NavigationBar({ cart, setCart }:NavigationBarProps) {
         message: null
       }
   })
+
+  const total_cart_items:number = cart.reduce((sum, item) => sum + item.quantity, 0) // Gets The Total Amount Of The Cart Items
+  const cart_modal_ref:React.RefObject<HTMLDialogElement|null> = useRef<HTMLDialogElement>(null) // Gets The Cart Modal Ref
 
   // Function For Handle The Customer Delivery Input Change
   const handleInputChange = (event:React.ChangeEvent<HTMLInputElement|HTMLTextAreaElement>) => {
@@ -134,25 +144,33 @@ export default function NavigationBar({ cart, setCart }:NavigationBarProps) {
         body: JSON.stringify({ ids }),
       })
 
-      const clothing:ClothingData[] = await response.json() // Gets The Clothing
+      const clothing_response:ClothingResponse = await response.json() // Gets The Clothing
 
-      // Gets The Cart Items (Clothing + Quantity)
-      const cart_items:CartProductDetail[] = clothing.map((one_clothing) => {
-        const existing:CartItem|null = cart.find((one_item) => one_item.id === one_clothing.id) || null // Gets The Already Existing Item In Cart (If Is Any) 
+      if(clothing_response.success && clothing_response.clothing) {
+        const clothing:Clothing[] = clothing_response.clothing
 
-        // Adds The New Item Or Increases The Quantity
-        return {
-          ...one_clothing,
-          quantity: existing ? existing.quantity : 1,
-        }
-      })
+        // Gets The Cart Items (Clothing + Quantity)
+        const cart_items:CartProductDetail[] = clothing.map((one_clothing) => {
+          const existing:CartItem|null = cart.find((one_item) => one_item.id === one_clothing.id) || null // Gets The Already Existing Item In Cart (If Is Any) 
 
-      setCartItems(cart_items) // Stores The Cart Items
+          // Adds The New Item Or Increases The Quantity
+          return {
+            ...one_clothing,
+            quantity: existing ? existing.quantity : 1,
+          }
+        })
+
+        setCartItems(cart_items) // Stores The Cart Items
+      }
+
+      else {
+        console.error(clothing_response.message) // Shows The Error
+      }
     }
     
     catch(error) {
       console.error(error) // Shows The Error
-    } 
+    }
     
     finally {
       setLoading(false) // Sets The State As Loaded
@@ -193,31 +211,31 @@ export default function NavigationBar({ cart, setCart }:NavigationBarProps) {
     if(!coupon_code) return // Do Nothing If The Coupon Wasn't Entered
 
     try {
-      // Gets The Cart Items
+      // Validates The Coupon
       const response:Response = await fetch(`${BACKEND_URL}/api/validate-coupon`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ coupon_code }),
       })
 
-      const data = await response.json() // Gets The Response Data
+      const validate_coupon_response:ValidateCouponResponse = await response.json() // Gets The Response Data
 
-      if(data && data.success && data.code && data.discount_percent) {
-        setAppliedCoupon(data.code) // Sets The Applied Coupon Code
-        setAppliedDiscount(data.discount_percent) // Sets The Applied Discount
-        setCouponMessage(`Kupón ${data.code} (${data.discount_percent}%) bol uplatnený!`) // Sets The Coupon Message
+      if(validate_coupon_response && validate_coupon_response.success && validate_coupon_response.code && validate_coupon_response.discount_percent) {
+        setAppliedCoupon(validate_coupon_response.code) // Sets The Applied Coupon Code
+        setAppliedDiscount(validate_coupon_response.discount_percent) // Sets The Applied Discount
+        setCouponMessage(`Kupón ${validate_coupon_response.code} (${validate_coupon_response.discount_percent}%) bol uplatnený!`) // Sets The Coupon Message
       }
 
       else {
         setAppliedCoupon(null) // Removes The Applied Coupon Code
         setAppliedDiscount(0) // Removes The Applied Discount
-        setCouponMessage(data.message) // Sets The Coupon Message
+        setCouponMessage(validate_coupon_response.message) // Sets The Coupon Message
       }
     }
     
     catch(error) {
       console.error(error) // Shows The Error
-      setCouponMessage("Pri aktivácii kupónu došlo k chybe.") // Sets The Coupon Message
+      setCouponMessage("Pri overovaní kupónu došlo k chybe.") // Sets The Coupon Message
     }
   }
 

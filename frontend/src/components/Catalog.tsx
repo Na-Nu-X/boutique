@@ -2,20 +2,36 @@
 import "./Catalog.scss"
 import { useState, useEffect } from "react"
 
-export interface ClothingData {
+export interface ClothingResponse {
+    success:boolean,
+    message:string,
+    clothing?:Clothing[]
+}
+
+export interface Clothing {
     id:number,
     title:string,
     description:string,
-    categoryId:number,
+    category_id?:number,
     price:number,
     image:string,
+    average_rating?:number,
+    rating_amount?:number,
+    modifier_groups?:modifierGroup[],
+    selected_modifiers?:Record<number, any[]>
+}
 
-    category:{
+interface modifierGroup {
+    id:number,
+    title:string,
+    is_multiple_choice:boolean,
+    is_required:boolean,
+
+    items:{
         id:number,
-        groupId:number,
-        name:string,
-        icon:string
-    }
+        title:string,
+        extra_price:number
+    }[]
 }
 
 interface CatalogProps {
@@ -25,33 +41,38 @@ interface CatalogProps {
 const BACKEND_URL = "http://localhost:5000" // Defines The Back-End URL
 
 export default function Catalog({ addToCart }:CatalogProps) {
-    const [clothing, setClothing] = useState<ClothingData[]>([]) // Stores The Clothing
+    const [clothing, setClothing] = useState<Clothing[]>([]) // Stores The Clothing
     const [loading, setLoading] = useState<boolean>(true) // Checks If Is Loading
     const [error, setError] = useState<string|null>(null) // Stores The Error
 
     useEffect(() => {
         // Gets The Clothing
         fetch(`${BACKEND_URL}/api/clothing`)
-        .then((response) => {
-            if(!response.ok) {
-                throw new Error("Pri načítaní položiek došlo k chybe.") // Sets The Error
-            }
-
+        .then((response:Response) => {
+            if(!response.ok) throw new Error("Pri načítaní položiek došlo k chybe.") // Sets The Error
             return response.json() // Gets The Data
         })
-        .then((data:ClothingData[]) => {
-            setClothing(data) // Sets The Clothing
-            setLoading(false) // Sets The State As Loaded
+        .then((clothing_response:ClothingResponse) => {
+            if(clothing_response.success && clothing_response.clothing) {
+                setClothing(clothing_response.clothing) // Sets The Clothing
+                setLoading(false) // Sets The State As Loaded
+            }
+
+            else {
+                setLoading(false) // Sets The State As Loaded
+                setError(clothing_response.message) // Sets The Error
+                console.error(clothing_response.message) // Shows The Error
+            }
         })
         .catch((error:Error) => {
             setLoading(false) // Sets The State As Loaded
-            setError(error.message) // Sets The Error
+            setError("Pri načítaní položiek došlo k chybe.") // Sets The Error
             console.error(error) // Shows The Error
         })
     }, [])
 
     if(loading) return <p>Načítavam...</p>
-    if(error) return <p>Pri načítaní položiek došlo k chybe.</p>
+    if(error) return <p>{error}</p>
     if(clothing.length === 0) return <p>Nenašli sa žiadne položky.</p>
 
     return (
@@ -60,9 +81,9 @@ export default function Catalog({ addToCart }:CatalogProps) {
                 {clothing.map((one_clothing) => (
                     <article className="one_product" key={one_clothing.id}>
                         <div className="rating">
-                            <span className="amount">0</span>
+                            <span className="amount">{one_clothing.rating_amount || 0}</span>
                             <i className="fa-solid fa-star"></i> {/* https://fontawesome.com/icons/star */}
-                            <span className="average">0</span>
+                            <span className="average">{one_clothing.average_rating || 0}</span>
                         </div>
 
                         <img src={`http://localhost:5000${one_clothing.image}`} alt={one_clothing.title} />
