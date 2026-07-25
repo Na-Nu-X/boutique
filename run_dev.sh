@@ -10,3 +10,4 @@ gnome-terminal --title="Express.js Backend" -- bash -c "cd '$ROOT_DIR/backend' &
 
 # Useful Commands:
 # npx prisma db push
+# npx prisma studio

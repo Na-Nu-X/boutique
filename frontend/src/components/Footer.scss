@@ -1,0 +1,102 @@
+@use '../styles/partials/variables';
+
+footer {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    min-height: 100vh;
+    margin-top: 20px;
+    text-align: center;
+    background: radial-gradient(circle, lighten(variables.$main-color, 10%) 0%, variables.$main-color 100%);
+    z-index: 2000;
+
+    h2 {
+        color: variables.$secondary-color;
+        font-family: variables.$heading-font;
+        font-size: clamp(2.5em, 5vw, 4em);
+    }
+
+    .address {
+        p {
+            color: darken(variables.$secondary-color, 40%);
+        }
+    }
+
+    .contact_us {
+        p {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            color: variables.$secondary-color;
+
+            i {
+                font-size: 1em;
+            }
+
+            a {
+                text-decoration: none;
+                color: darken(variables.$secondary-color, 40%);
+
+                font: {
+                    size: 0.9em;
+                    style: italic;
+                }
+
+                &:hover,
+                &:active {
+                    text-decoration: underline;
+                    cursor: pointer;
+                }
+            }
+        }
+    }
+
+    .social_media {
+        a {
+            display: inline-block;
+            margin: 0px 5px;
+            color: variables.$secondary-color;
+            transition: transform 0.3s ease;
+
+            &:hover {
+                transform: scale(1.1);
+                cursor: pointer;
+            }
+
+            i {
+                font-size: 2em;
+            }
+        }
+    }
+
+    .payment_methods {
+        .icons {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            height: 32px;
+            
+            img {
+                opacity: 0.8;
+            }
+        }
+    }
+
+    .other {
+        color: darken(variables.$secondary-color, 40%);
+
+        .copywrite {
+            color: darken(variables.$secondary-color, 40%);
+
+            font: {
+                family: variables.$copywrite-font;
+                size: 0.8em;
+            }
+        }
+    }
+}

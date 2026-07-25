@@ -15,7 +15,7 @@ interface StatusResponse {
   next_open?:string
 }
 
-interface CartProductDetail extends Clothing {
+export interface CartProductDetail extends Clothing {
   quantity:number
 }
 
@@ -96,9 +96,6 @@ export default function NavigationBar({ cart, setCart }:NavigationBarProps) {
       }
   })
 
-  const total_cart_items:number = cart.reduce((sum, item) => sum + item.quantity, 0) // Gets The Total Amount Of The Cart Items
-  const cart_modal_ref:React.RefObject<HTMLDialogElement|null> = useRef<HTMLDialogElement>(null) // Gets The Cart Modal Ref
-
   // Function For Handle The Customer Delivery Input Change
   const handleInputChange = (event:React.ChangeEvent<HTMLInputElement|HTMLTextAreaElement>) => {
     const { name, value } = event.target // Gets The Name And Value Of Input
@@ -108,6 +105,9 @@ export default function NavigationBar({ cart, setCart }:NavigationBarProps) {
       [name]: value, // Updates The Changed Value
     }))
   }
+
+  const total_cart_items:number = cart.reduce((sum, item) => sum + item.quantity, 0) // Gets The Total Amount Of The Cart Items
+  const cart_modal_ref:React.RefObject<HTMLDialogElement|null> = useRef<HTMLDialogElement>(null) // Gets The Cart Modal Ref
 
   useEffect(() => {
     const cart_modal:HTMLDialogElement|null = cart_modal_ref.current // Gets The Cart Modal
@@ -303,7 +303,7 @@ export default function NavigationBar({ cart, setCart }:NavigationBarProps) {
             customer,
             applied_coupon
           }
-        ),
+        )
       })
 
       const data = await response.json() // Gets The Response Data

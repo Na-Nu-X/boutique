@@ -94,6 +94,72 @@
                     font-weight: bold;
                 }
             }
+
+            .modifier_group {
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+                margin-top: 10px;
+                padding-top: 10px;
+                border-top: 1px solid darken(variables.$secondary-color, 6%);
+    
+                > p {
+                    margin: 0px;
+                    color: variables.$main-color;
+                    font-weight: 600;
+    
+                    .required {
+                        color: variables.$red-color;
+                        font-weight: bold;
+                    }
+                }
+    
+                .modifier_item {
+                    display: flex;
+                    align-items: center;
+                    padding: 5px 10px;
+                    background-color: darken(variables.$secondary-color, 3%);
+                    border: 1px solid darken(variables.$secondary-color, 10%);
+                    border-radius: variables.$small-border-radius;
+                    user-select: none;
+                    cursor: pointer;
+                    transition: background-color 0.2s ease, transform 0.1s ease;
+    
+                    &:hover {
+                        background-color: variables.$secondary-color;
+                    }
+    
+                    &:active {
+                        transform: scale(0.98);
+                    }
+    
+                    input[type="checkbox"],
+                    input[type="radio"] {
+                        width: 15px;
+                        height: 15px;
+                        accent-color: variables.$dark-green-color;
+                        cursor: pointer;
+                    }
+    
+                    span {
+                        margin-left: 10px;
+                        color: variables.$main-color;
+                    }
+    
+                    .price {
+                        margin-left: auto;
+                        font-size: 0.9em;
+                        font-weight: bold;
+                        line-height: 1;
+                    
+                        span {
+                            font-size: 0.6em;
+                            vertical-align: super;
+                            margin-left: 2px;
+                        }
+                    }
+                }
+            }
     
             .bottom {
                 display: flex;

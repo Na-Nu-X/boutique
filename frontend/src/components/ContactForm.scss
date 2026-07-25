@@ -1,0 +1,41 @@
+@use '../styles/partials/variables';
+@use '../styles/partials/mixins';
+
+.contact_form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-width: 500px;
+    margin: 20px auto 0px;
+    padding: 20px;
+    background-color: variables.$secondary-color;
+    border-radius: variables.$medium-border-radius;
+    box-shadow: 0 4px 6px transparentize(variables.$main-color, 0.92), 0 2px 4px transparentize(variables.$main-color, 0.95);
+  
+    .name_container {
+        display: flex;
+        gap: 10px;
+  
+        input {
+            flex: 1;
+        }
+    }
+  
+    input[type="text"],
+    input[type="email"],
+    textarea {
+        @include mixins.form_input;
+    }
+  
+    textarea {
+        resize: none;
+        min-height: 100px;
+    }
+
+    .send {
+        @include mixins.dark_green_button($width: auto);
+        max-width: 100%;
+        padding: 10px 20px;
+        text-align: center;
+    }
+}

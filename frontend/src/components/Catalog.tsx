@@ -75,6 +75,42 @@ export default function Catalog({ addToCart }:CatalogProps) {
     if(error) return <p>{error}</p>
     if(clothing.length === 0) return <p>Nenašli sa žiadne položky.</p>
 
+    // // Function For Select The Modifier With A Radio Button
+    // const SelectModifierRadio = (
+    //     clothing:Clothing, 
+    //     group:modifierGroup, 
+
+    //     item:{
+    //         id:number,
+    //         title:string,
+    //         extra_price:number
+    //     }
+    // ) => {
+    //     if(!clothing.selected_modifiers) clothing.selected_modifiers = {}
+    //     clothing.selected_modifiers[group.id] = [item]
+    // }
+
+    // // Function For Toggle The Modifier With A Checkbox Button
+    // const ToggleModifierCheckbox = (
+    //     clothing:Clothing, 
+    //     group:modifierGroup, 
+
+    //     item:{
+    //         id:number,
+    //         title:string,
+    //         extra_price:number
+    //     }, 
+        
+    //     event:React.ChangeEvent<HTMLInputElement>
+    // ) => {
+    //     const is_checked:boolean = (event.target as HTMLInputElement).checked
+
+    //     if(!clothing.selected_modifiers) clothing.selected_modifiers = {}
+    //     if(!clothing.selected_modifiers[group.id]) clothing.selected_modifiers[group.id] = []
+    //     if(is_checked) clothing.selected_modifiers[group.id].push(item)
+    //     else clothing.selected_modifiers[group.id] = clothing.selected_modifiers[group.id].filter(item => item.id !== item.id)
+    // }
+
     return (
         <div className="catalog">
             <div className="all_products">
@@ -90,6 +126,58 @@ export default function Catalog({ addToCart }:CatalogProps) {
 
                         <p className="title">{one_clothing.title}</p>
                         <p className="description">{one_clothing.description}</p>
+
+                        {one_clothing.modifier_groups && (
+                            one_clothing.modifier_groups.map((one_modifier_group) => (
+                                <div className="modifier_group">
+                                    <p>
+                                        { one_modifier_group.title }
+
+                                        {one_modifier_group.is_required && (
+                                            <span className="required">*</span>
+                                        )}
+                                    </p>
+                            
+                                    {one_modifier_group.items.map((one_item) => (
+                                        <label className="modifier_item">
+                                            {one_modifier_group.is_multiple_choice && (
+                                                <input 
+                                                    type="checkbox" 
+                                                    name={`clothing_${one_clothing.id}_group_${one_modifier_group.id}`}
+                                                    value={one_item.id}
+                                                    // onChange={(event:React.ChangeEvent<HTMLInputElement>) => ToggleModifierCheckbox(one_clothing, one_modifier_group, one_item, event)}
+                                                />
+                                            )}
+
+                                            {!one_modifier_group.is_multiple_choice && (
+                                                <input 
+                                                    type="radio" 
+                                                    name={`clothing_${one_clothing.id}_group_${one_modifier_group.id}`}
+                                                    value={one_item.id}
+                                                    // onChange={() => SelectModifierRadio(one_clothing, one_modifier_group, one_item)}
+
+                                                    // onChange={() => {
+                                                    //     const updated_clothing = SelectModifierRadio(one_clothing, one_modifier_group, one_item)
+                                                        
+                                                    //     setClothing((previous_clothing_array) => 
+                                                    //         previous_clothing_array.map((one_item) => 
+                                                    //             one_item.id === updated_clothing.id ? updated_clothing : one_item
+                                                    //         )
+                                                    //     )
+                                                    // }}
+                                                />
+                                            )}
+                                
+                                            <span>{ one_item.title }</span>
+
+                                            {one_item.extra_price > 0 && (
+                                                <p className="price">{(one_item.extra_price / 100).toFixed(2).replace(".", ",")}<span>€</span></p>
+                                            )}
+                                        </label>
+                                    ))}
+                                </div>
+                            ))
+                        )}
 
                         <div className="bottom">
                             <p className="price">{(one_clothing.price / 100).toFixed(2).replace(".", ",")}<span>€</span></p>

@@ -1,9 +1,14 @@
 // @ts-ignore
 import "./App.css"
 import { useState, useEffect } from "react"
+import { BrowserRouter, Routes, Route } from "react-router-dom"
 import NavigationBar from "./components/NavigationBar.tsx"
 import Banner from "./components/Banner.jsx"
 import Catalog from "./components/Catalog.tsx"
+import ContactForm from "./components/ContactForm.tsx"
+import Footer from "./components/Footer.tsx"
+import SuccessPayment from "./components/SuccessPayment.tsx"
+import Order from "./components/Order.tsx"
 
 export interface CartItem {
   id:number,
@@ -82,10 +87,34 @@ export default function App() {
   }
 
   return (
-    <div>
-      <NavigationBar cart={cart} setCart={setCart} />
-      <Banner />
-      <Catalog addToCart={addToCart} />
-    </div>
+    <BrowserRouter>
+        <Routes>
+            <Route path="/" element={
+              <div>
+                <NavigationBar cart={cart} setCart={setCart} />
+                <Banner />
+                <Catalog addToCart={addToCart} />
+                <ContactForm />
+                <Footer />
+              </div>
+            } />
+            
+            <Route path="/platba-uspesna" element={
+              <div>
+                <NavigationBar cart={cart} setCart={setCart} />
+                <SuccessPayment />
+                <Footer />
+              </div>
+            } />
+
+            <Route path="/objednavka/:tracking_code" element={
+              <div>
+                <NavigationBar cart={cart} setCart={setCart} />
+                <Order />
+                <Footer />
+              </div>
+            } />
+        </Routes>
+    </BrowserRouter>
   )
 }

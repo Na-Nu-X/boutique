@@ -96,9 +96,9 @@
     }
 }
 
-// Orange Button
+// Dark Green Button
 
-@mixin orange_button($width: 150px, $border-radius: $small-border-radius) {
+@mixin dark_green_button($width: 150px, $border-radius: $small-border-radius) {
     all: unset;
     width: $width;
     padding: 10px 0px;
@@ -122,9 +122,9 @@
     }
 }
 
-// Yellow Button
+// Green Button
 
-@mixin yellow_button($width: 150px, $border-radius: $small-border-radius) {
+@mixin green_button($width: 150px, $border-radius: $small-border-radius) {
     all: unset;
     width: $width;
     padding: 10px 0px;

@@ -7,6 +7,8 @@ const app = express()
 const Stripe = require("stripe")
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY)
 
+const nodemailer = require("nodemailer")
+
 const prisma = new PrismaClient()
 
 app.use(cors())
@@ -627,6 +629,166 @@ app.post("/api/cancel-order/:tracking_code", async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Pri rušení objednávky došlo k chybe."
+    })
+  }
+})
+
+// Gets The Order Status
+app.post("/api/order-status/:tracking_code", async (req, res) => {
+  try {
+    const tracking_code = req.params.tracking_code // Gets The Tracking Code From URL
+
+    // Gets The Order
+    const order = await prisma.order.findFirst({
+      where: {
+        tracking_code: tracking_code.toUpperCase()
+      }
+    })
+
+    if(!order) {
+      return res.status(404).json({
+        success: false, 
+        message: "Objednávku sa nepodarilo nájsť."
+      })
+    }
+    
+    return res.status(200).json({
+      success: true, 
+      message: "Objednávka bola nájdená.",
+      order_details: order_details
+    })
+  } 
+  
+  catch(error) {
+    console.error(error) // Shows The Error
+
+    return res.status(500).json({
+      success: false,
+      message: "Pri hľadaní objednávky došlo k chybe."
+    })
+  }
+})
+
+// Gets The Ordered Items
+app.get("/api/ordered-items/:id", async (req, res) => { // Zmenené z POST na GET
+  try {
+    const id = parseInt(req.params.id) // Gets The ID From URL
+
+    if(isNaN(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Objednávku sa nepodarilo nájsť."
+      })
+    }
+
+    const items = await prisma.orderItem.findMany({
+      where: {
+        order_id: id,
+        is_tip: false
+      },
+
+      include: {
+        clothing: true
+      }
+    })
+
+    // Creates Valid Format Of Ordered Items For JSON Response
+    const ordered_items = items
+      .filter(one_item => one_item.clothing)
+      .map(one_item => {
+        return {
+          id: one_item.clothing.id,
+          title: one_item.clothing.title,
+          description: one_item.clothing.description,
+          price: one_item.price_at_purchase,
+          quantity: one_item.quantity,
+          image: one_item.clothing.image ? one_item.clothing.image : null
+        }
+      })
+    
+    return res.status(200).json({
+      success: true, 
+      message: "Položky boli nájdené.",
+      ordered_items: ordered_items
+    })
+  } 
+  
+  catch(error) {
+    console.error(error) // Shows The Error
+
+    return res.status(500).json({
+      success: false,
+      message: "Pri hľadaní položiek objednávky došlo k chybe."
+    })
+  }
+})
+
+// Sends The Message
+app.post("/api/contact", async (req, res) => {
+  try {
+    const { first_name, last_name, email_address, message } = req.body // Gets The Data
+
+    // If The Contact Form Isn't Filled
+    if(!first_name || !last_name || !email_address || !message) {
+      return res.status(400).json({
+        success: false,
+        message: "Prosím, vyplňte všetky povinné kontaktné údaje pre odoslanie správy."
+      })
+    }
+
+    // Saves The New Message
+    await prisma.contactMessage.create({
+      data: {
+        first_name: first_name,
+        last_name: last_name,
+        email_address: email_address,
+        message: message
+      }
+    })
+
+    // Sends Mail
+    const transporter = nodemailer.createTransport({
+      host: process.env.EMAIL_HOST,
+      port: process.env.EMAIL_PORT, 
+      secure: true, // True For PORT 465, False For PORT 587
+
+      auth: {
+        user: process.env.EMAIL_HOST_USER,
+        pass: process.env.EMAIL_HOST_PASSWORD
+      }
+    })
+
+    const subject = "Butik - správa od zákazníka"
+    const text_content = `${first_name} ${last_name} - ${email_address}\n\n${message}`;
+
+    const html_content = `
+        <p>
+            <b>${first_name} ${last_name} - ${email_address}</b><br><br>
+            ${message}
+        </p>
+    `
+
+    await transporter.sendMail({
+      from: process.env.EMAIL_HOST_USER,
+      replyTo: email_address,
+      to: process.env.EMAIL_HOST_USER,
+      subject: subject,
+      text: text_content,
+      html: html_content
+    })
+    
+    return res.status(200).json({
+      success: true, 
+      message: "Správa bola odoslaná."
+    })
+  } 
+  
+  catch(error) {
+    console.error(error) // Shows The Error
+
+    return res.status(500).json({
+      success: false,
+      message: "Pri odosielaní správy došlo k chybe."
     })
   }
 })

@@ -1,5 +1,5 @@
 import "./Banner.scss"
-import image_1 from '../assets/image_1.jpg'
+import image_1 from "../assets/image_1.jpg"
 
 export default function Banner() {
   return (
