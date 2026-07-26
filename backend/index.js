@@ -197,6 +197,14 @@ app.post("/api/cart-items", async(req, res) => {
     const clothing = await prisma.clothing.findMany({
       where: {
         id: { in: ids }
+      },
+
+      include: {
+        modifier_groups: {
+          include: {
+            items: true
+          }
+        }
       }
     })
 

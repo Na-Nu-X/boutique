@@ -13,7 +13,17 @@ import Order from "./components/Order.tsx"
 
 export interface CartItem {
   id:number,
-  quantity:number
+  quantity:number,
+
+  selected_modifiers?:Record<
+    number,
+    
+    {
+      id:number,
+      title:string,
+      extra_price:number
+    }[]
+  >
 }
 
 interface CancelOrderResponse {
@@ -71,19 +81,41 @@ export default function App() {
   }, [cart])
 
   // Function For Add The Item To The Cart
-  const addToCart = (id:number) => {
-    // Gets The Cart Items
-    setCart((previous_cart:CartItem[]) => {
-      const existing:CartItem|undefined = previous_cart.find((one_item) => one_item.id === id) // Gets The Already Existing Item In Cart (If Is Any) 
+  const addToCart = (
+    id:number, 
 
-      // If The Item Is In Cart
-      if(existing) {
+    selected_modifiers:Record<
+      number, 
+    
+      {
+        id:number,
+        title:string,
+        extra_price:number
+      }[]
+    >|undefined = {}
+  ) => {
+    setCart((previous_cart:CartItem[]) => {
+      const existing_cart_item:CartItem|undefined = previous_cart.find((one_item) => one_item.id === id && JSON.stringify(one_item.selected_modifiers) === JSON.stringify(selected_modifiers)) // Checks If There Is Already The Same Item (Same ID, Same Modifiers) In The Cart
+
+      // Increases The Quantity Of An Existing Item
+      if(existing_cart_item) {
         return previous_cart.map((one_item) =>
-          one_item.id === id ? { ...one_item, quantity: one_item.quantity + 1 } : one_item // Increases The Quantity
+          one_item === existing_cart_item 
+            ? { ...one_item, quantity: one_item.quantity + 1 } 
+            : one_item
         )
       }
 
-      return [...previous_cart, { id: id, quantity: 1 }] // Adds The New Item
+      // Adds The New Item To The Cart
+      return [
+        ...previous_cart,
+
+        {
+          id: id,
+          quantity: 1,
+          selected_modifiers: selected_modifiers
+        }
+      ]
     })
   }
 

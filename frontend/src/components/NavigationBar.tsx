@@ -147,20 +147,18 @@ export default function NavigationBar({ cart, setCart }:NavigationBarProps) {
       const clothing_response:ClothingResponse = await response.json() // Gets The Clothing
 
       if(clothing_response.success && clothing_response.clothing) {
-        const clothing:Clothing[] = clothing_response.clothing
-
-        // Gets The Cart Items (Clothing + Quantity)
-        const cart_items:CartProductDetail[] = clothing.map((one_clothing) => {
-          const existing:CartItem|null = cart.find((one_item) => one_item.id === one_clothing.id) || null // Gets The Already Existing Item In Cart (If Is Any) 
-
-          // Adds The New Item Or Increases The Quantity
+        const cart_clothing:Clothing[] = clothing_response.clothing // Stores The Clothing From Cart
+    
+        const cart_items:CartProductDetail[] = cart.map((cart_item:CartItem) => {
+          const product = cart_clothing.find((c) => c.id === cart_item.id) // Gets The Product
+  
           return {
-            ...one_clothing,
-            quantity: existing ? existing.quantity : 1,
-          }
+            ...(product || {}), // Data From API
+            ...cart_item, // Local Data (Quantity, Selected Modifiers)
+          } as CartProductDetail
         })
-
-        setCartItems(cart_items) // Stores The Cart Items
+    
+        setCartItems(cart_items) // Sets The Cart Items
       }
 
       else {
@@ -178,9 +176,8 @@ export default function NavigationBar({ cart, setCart }:NavigationBarProps) {
   }
 
   // Function For Change The Cart Item
-  const changeCartItem = (id:number) => {
-    const item_index:number = cart_items.findIndex((one_item) => one_item.id === id) // Gets The Index Of The Cart Item
-    if(item_index !== -1) setCurrentIndex(item_index) // Changes The Current Index Of The Active Item
+  const changeCartItem = (index:number) => {
+    setCurrentIndex(index) // Changes The Current Index Of The Active Item
   }
 
   // Function For Remove The Item From Cart
@@ -376,6 +373,24 @@ export default function NavigationBar({ cart, setCart }:NavigationBarProps) {
       alert("Pri spracovávaní objednávky došlo k chybe.") // Shows The Alert
     }
   }
+
+  // Function For Calculate The Cart Item Price (Item + Extra Price For The Modifier)
+  const calculateItemPrice = (item:CartProductDetail) => {
+    let base_price:number = item.price || 0 // Stores The Item Base Price
+    let modifiers_extra_price:number = 0 // Stores The Extra Price Of The Modifiers
+
+    if(item.selected_modifiers) {
+      Object.values(item.selected_modifiers).forEach((group_items) => {
+        if(Array.isArray(group_items)) {
+          group_items.forEach((mod) => {
+            modifiers_extra_price += mod.extra_price || 0
+          })
+        }
+      })
+    }
+
+    return (base_price + modifiers_extra_price) * (item.quantity || 1)
+  }
   
   return (
     <div>
@@ -424,17 +439,25 @@ export default function NavigationBar({ cart, setCart }:NavigationBarProps) {
                 style={{ transform: `translateX(calc(${-current_index * 100}% + ${current_index * 20}px))` }}
               >
                 {cart_items.map((one_item:CartProductDetail, index:number) => (
-                  <div className="one_item" key={one_item.id || index} onClick={() => changeCartItem(one_item.id)}>
+                  <div className="one_item" key={index} onClick={() => changeCartItem(index)}>
                     <img src={`http://localhost:5000${one_item.image}`} alt={one_item.title} />
 
                     <p className="title">{ one_item.title }</p>
 
                     <div className="bottom">
-                      <p className="price">{(one_item.price * one_item.quantity / 100).toFixed(2).replace(".", ",")}<span>€</span></p>
+                      <p className="price">{(calculateItemPrice(one_item) / 100).toFixed(2).replace(".", ",")}<span>€</span></p>
 
                       {one_item.quantity > 1 && (
                         <p className="quantity">{one_item.quantity}×</p>
                       )}
+
+                      {one_item.selected_modifiers && 
+                        Object.values(one_item.selected_modifiers).flat().map((one_selected_modifier) => (
+                          <p className="modifier" key={one_selected_modifier.id}>
+                            {one_selected_modifier.title} +{(one_selected_modifier.extra_price / 100).toFixed(2).replace(".", ",")}€
+                          </p>
+                        ))
+                      }
 
                       <button 
                         className="remove_from_cart" 
@@ -454,9 +477,9 @@ export default function NavigationBar({ cart, setCart }:NavigationBarProps) {
               <div className="bars">
                 {cart_items.map((one_bar:CartProductDetail, index:number) => (
                   <div 
-                    key={one_bar.id || index} 
-                    className="one_bar"
-                    onClick={() => changeCartItem(one_bar.id)}
+                    key={index} 
+                    className={`one_bar ${current_index === index ? "active" : ""}`} 
+                    onClick={() => changeCartItem(index)}
                   ></div>
                 ))}
               </div>

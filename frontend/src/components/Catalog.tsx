@@ -18,7 +18,16 @@ export interface Clothing {
     average_rating?:number,
     rating_amount?:number,
     modifier_groups?:modifierGroup[],
-    selected_modifiers?:Record<number, any[]>
+
+    selected_modifiers?:Record<
+        number, 
+        
+        {
+            id:number,
+            title:string,
+            extra_price:number
+        }[]
+    >
 }
 
 interface modifierGroup {
@@ -35,7 +44,15 @@ interface modifierGroup {
 }
 
 interface CatalogProps {
-    addToCart:(id:number) => void
+    addToCart:(id:number, selected_modifiers?:Record<
+        number, 
+        
+        {
+          id:number,
+          title:string,
+          extra_price:number
+        }[]
+    >|undefined) => void
 }
 
 const BACKEND_URL = "http://localhost:5000" // Defines The Back-End URL
@@ -75,41 +92,48 @@ export default function Catalog({ addToCart }:CatalogProps) {
     if(error) return <p>{error}</p>
     if(clothing.length === 0) return <p>Nenašli sa žiadne položky.</p>
 
-    // // Function For Select The Modifier With A Radio Button
-    // const SelectModifierRadio = (
-    //     clothing:Clothing, 
-    //     group:modifierGroup, 
+    // Function For Create The Copy Of Current Modifiers
+    const getSafeModifiers = (clothing:Clothing) => {
+        return clothing.selected_modifiers ? { ...clothing.selected_modifiers } : {}
+    }
 
-    //     item:{
-    //         id:number,
-    //         title:string,
-    //         extra_price:number
-    //     }
-    // ) => {
-    //     if(!clothing.selected_modifiers) clothing.selected_modifiers = {}
-    //     clothing.selected_modifiers[group.id] = [item]
-    // }
+    // Function For Select The Modifier With A Radio Button
+    const SelectModifierRadio = (
+        clothing_id:number,
+        group:modifierGroup, 
+        item: { id: number, title: string, extra_price: number }
+    ) => {
+        setClothing((previous_clothing) => previous_clothing.map((one_clothing) => {
+            if(one_clothing.id !== clothing_id) return one_clothing
 
-    // // Function For Toggle The Modifier With A Checkbox Button
-    // const ToggleModifierCheckbox = (
-    //     clothing:Clothing, 
-    //     group:modifierGroup, 
+            const updated_modifiers = getSafeModifiers(one_clothing) // Gets The Updated Modifiers
 
-    //     item:{
-    //         id:number,
-    //         title:string,
-    //         extra_price:number
-    //     }, 
-        
-    //     event:React.ChangeEvent<HTMLInputElement>
-    // ) => {
-    //     const is_checked:boolean = (event.target as HTMLInputElement).checked
+            updated_modifiers[group.id] = [item]
+            return { ...one_clothing, selected_modifiers: updated_modifiers }
+        }))
+    }
 
-    //     if(!clothing.selected_modifiers) clothing.selected_modifiers = {}
-    //     if(!clothing.selected_modifiers[group.id]) clothing.selected_modifiers[group.id] = []
-    //     if(is_checked) clothing.selected_modifiers[group.id].push(item)
-    //     else clothing.selected_modifiers[group.id] = clothing.selected_modifiers[group.id].filter(item => item.id !== item.id)
-    // }
+    // Function For Toggle The Modifier With A Checkbox Button
+    const ToggleModifierCheckbox = (
+        clothing_id:number,
+        group:modifierGroup, 
+        item: { id: number, title: string, extra_price: number }, 
+        event:React.ChangeEvent<HTMLInputElement>
+    ) => {
+        const is_checked:boolean = event.target.checked // Stores The Information If The Checkbox Is Checked
+
+        setClothing((previous_clothing) => previous_clothing.map((one_clothing) => {
+            if(one_clothing.id !== clothing_id) return one_clothing
+
+            const updated_modifiers = getSafeModifiers(one_clothing) // Gets The Updated Modifiers
+            const current_group_selection = updated_modifiers[group.id] || [] // Gets The Current Group Selection
+
+            if(is_checked) updated_modifiers[group.id] = [...current_group_selection, item] // Adds The New Modifier
+            else updated_modifiers[group.id] = current_group_selection.filter((i) => i.id !== item.id) // Removes The New Modifier
+
+            return { ...one_clothing, selected_modifiers: updated_modifiers }
+        }))
+    }
 
     return (
         <div className="catalog">
@@ -145,7 +169,7 @@ export default function Catalog({ addToCart }:CatalogProps) {
                                                     type="checkbox" 
                                                     name={`clothing_${one_clothing.id}_group_${one_modifier_group.id}`}
                                                     value={one_item.id}
-                                                    // onChange={(event:React.ChangeEvent<HTMLInputElement>) => ToggleModifierCheckbox(one_clothing, one_modifier_group, one_item, event)}
+                                                    onChange={(event:React.ChangeEvent<HTMLInputElement>) => ToggleModifierCheckbox(one_clothing.id, one_modifier_group, one_item, event)}
                                                 />
                                             )}
 
@@ -154,17 +178,7 @@ export default function Catalog({ addToCart }:CatalogProps) {
                                                     type="radio" 
                                                     name={`clothing_${one_clothing.id}_group_${one_modifier_group.id}`}
                                                     value={one_item.id}
-                                                    // onChange={() => SelectModifierRadio(one_clothing, one_modifier_group, one_item)}
-
-                                                    // onChange={() => {
-                                                    //     const updated_clothing = SelectModifierRadio(one_clothing, one_modifier_group, one_item)
-                                                        
-                                                    //     setClothing((previous_clothing_array) => 
-                                                    //         previous_clothing_array.map((one_item) => 
-                                                    //             one_item.id === updated_clothing.id ? updated_clothing : one_item
-                                                    //         )
-                                                    //     )
-                                                    // }}
+                                                    onChange={() => SelectModifierRadio(one_clothing.id, one_modifier_group, one_item)}
                                                 />
                                             )}
                                 
@@ -185,7 +199,7 @@ export default function Catalog({ addToCart }:CatalogProps) {
                                 className="add_to_cart" 
                                 title="Pridať do košíka" 
                                 aria-label="Pridať do košíka"
-                                onClick={() => addToCart(one_clothing.id)}
+                                onClick={() => addToCart(one_clothing.id, one_clothing.selected_modifiers)}
                             >
                                 <i className="fa-solid fa-basket-shopping"></i> Pridať {/* https://fontawesome.com/icons/basket-shopping */}
                             </button>
