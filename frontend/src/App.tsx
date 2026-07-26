@@ -8,6 +8,7 @@ import Catalog from "./components/Catalog.tsx"
 import ContactForm from "./components/ContactForm.tsx"
 import Footer from "./components/Footer.tsx"
 import SuccessPayment from "./components/SuccessPayment.tsx"
+import SuccessOrder from "./components/SuccessOrder.tsx"
 import Order from "./components/Order.tsx"
 
 export interface CartItem {
@@ -103,6 +104,14 @@ export default function App() {
               <div>
                 <NavigationBar cart={cart} setCart={setCart} />
                 <SuccessPayment />
+                <Footer />
+              </div>
+            } />
+
+            <Route path="/objednavka-uspesna" element={
+              <div>
+                <NavigationBar cart={cart} setCart={setCart} />
+                <SuccessOrder />
                 <Footer />
               </div>
             } />

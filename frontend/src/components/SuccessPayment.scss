@@ -26,9 +26,18 @@
             margin: 0 auto 20px;
             background: transparentize(variables.$green-color, 0.9);
             border-radius: 50%;
-        
+
+            &:has(.fa-xmark) {
+                background: transparentize(variables.$red-color, 0.9);
+            }
+
             .fa-check {
                 color: variables.$green-color;
+                font-size: 2.5em;
+            }
+
+            .fa-xmark {
+                color: variables.$red-color;
                 font-size: 2.5em;
             }
         }
@@ -36,13 +45,13 @@
         h1 {
             margin-bottom: 10px;
             color: variables.$main-color;
-            font-family: variables.$heading-font;
+            font-family: variables.$secondary-font;
             font-size: 1.8em;
         }
 
         .tracking_code {
             margin-bottom: 10px;
-            font-family: variables.$heading-font;
+            font-family: variables.$secondary-font;
             font-size: 1.8em;
         }
         

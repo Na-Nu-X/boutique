@@ -46,14 +46,14 @@
 
         h1 {
             color: variables.$main-color;
-            font-family: variables.$heading-font;
+            font-family: variables.$secondary-font;
             font-size: 1.8em;
         }
 
         .subheading {
             margin-bottom: 20px;
             color: variables.$green-color;
-            font-family: variables.$heading-font;
+            font-family: variables.$secondary-font;
             font-size: 1.2em;
             font-weight: 600;
         }
@@ -78,7 +78,7 @@
             overflow: hidden;
 
             h2 {
-                font-family: variables.$heading-font;
+                font-family: variables.$secondary-font;
                 font-size: 1.2em;
                 font-weight: 600;
             }
@@ -229,7 +229,7 @@
     .not_found_order {
         h1 {
             color: variables.$main-color;
-            font-family: variables.$heading-font;
+            font-family: variables.$secondary-font;
             font-size: 1.8em;
         }
 

@@ -129,7 +129,7 @@ export default function Catalog({ addToCart }:CatalogProps) {
 
                         {one_clothing.modifier_groups && (
                             one_clothing.modifier_groups.map((one_modifier_group) => (
-                                <div className="modifier_group">
+                                <div className="modifier_group" key={one_modifier_group.id}>
                                     <p>
                                         { one_modifier_group.title }
 
@@ -139,7 +139,7 @@ export default function Catalog({ addToCart }:CatalogProps) {
                                     </p>
                             
                                     {one_modifier_group.items.map((one_item) => (
-                                        <label className="modifier_item">
+                                        <label className="modifier_item" key={one_item.id}>
                                             {one_modifier_group.is_multiple_choice && (
                                                 <input 
                                                     type="checkbox" 

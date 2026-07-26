@@ -1,7 +1,4 @@
-// @ts-ignore
-import "./SuccessPayment.scss"
-
-export default function SuccessPayment() {
+export default function SuccessOrder() {
     const query_params:URLSearchParams = new URLSearchParams(window.location.search) // Gets The Query Params
     const tracking_code:string|null = query_params.get("code") || null // Gets The Tracking Code
 
@@ -14,7 +11,7 @@ export default function SuccessPayment() {
 
                 {tracking_code && (
                     <div>
-                        <h1>Platba prebehla úspešne!</h1>
+                        <h1>Objednávka bola prijatá!</h1>
                         <h2 className="tracking_code">Kód: {tracking_code}</h2>
                         <p>Ďakujeme za tvoju objednávku. Naši kuchári sa už pustili do práce a tvoje jedlo bude čoskoro na ceste.</p>
                     </div>
@@ -22,8 +19,8 @@ export default function SuccessPayment() {
 
                 {!tracking_code && (
                     <div>
-                        <h1>Neexistujúca platba!</h1>
-                        <p>Túto platbu nie je možné nájsť.</p>
+                        <h1>Neexistujúca objednávka!</h1>
+                        <p>Túto objednávku nie je možné nájsť.</p>
                     </div>
                 )}
                 

@@ -309,7 +309,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
 
     const discount_amount = discount_percent > 0 ? Math.floor(raw_items_price * (discount_percent / 100)) : 0 // Stores The Discount Amount
     const discounted_items_price = raw_items_price - discount_amount // Stores The Discounted Items Price
-    const total_price = discounted_items_price + tip_amount // Gets The Total Price In Cents (Dishes After Discount + Tip)
+    const total_price = discounted_items_price + tip_amount // Gets The Total Price In Cents (Clothing After Discount + Tip)
 
     // Processes The Order
 
@@ -437,7 +437,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
       payment_method_types: ["card"],
       line_items: line_items,
       mode: "payment",
-      success_url: `${front_end_domain}success?code=${new_order.tracking_code}`,
+      success_url: `${front_end_domain}platba-uspesna?code=${new_order.tracking_code}`,
       cancel_url: `${front_end_domain}?cancel_order_code=${new_order.tracking_code}`,
 
       metadata: {
@@ -577,7 +577,7 @@ app.post("/api/create-order", async (req, res) => {
       success: true,
       message: "Objednávka bola prijatá.",
       tracking_code: new_order.tracking_code,
-      url: `${front_end_domain}success-order?code=${new_order.tracking_code}`
+      url: `${front_end_domain}objednavka-uspesna?code=${new_order.tracking_code}`
     })
   } 
   
@@ -634,7 +634,7 @@ app.post("/api/cancel-order/:tracking_code", async (req, res) => {
 })
 
 // Gets The Order Status
-app.post("/api/order-status/:tracking_code", async (req, res) => {
+app.get("/api/order-status/:tracking_code", async (req, res) => {
   try {
     const tracking_code = req.params.tracking_code // Gets The Tracking Code From URL
 
@@ -655,7 +655,7 @@ app.post("/api/order-status/:tracking_code", async (req, res) => {
     return res.status(200).json({
       success: true, 
       message: "Objednávka bola nájdená.",
-      order_details: order_details
+      order_details: order
     })
   } 
   
@@ -670,7 +670,7 @@ app.post("/api/order-status/:tracking_code", async (req, res) => {
 })
 
 // Gets The Ordered Items
-app.get("/api/ordered-items/:id", async (req, res) => { // Zmenené z POST na GET
+app.post("/api/ordered-items/:id", async (req, res) => { // Zmenené z POST na GET
   try {
     const id = parseInt(req.params.id) // Gets The ID From URL
 
@@ -692,17 +692,26 @@ app.get("/api/ordered-items/:id", async (req, res) => { // Zmenené z POST na GE
       }
     })
 
+    const all_ratings = await prisma.rating.findMany({
+      where: {
+        order_id: id
+      }
+    })
+
     // Creates Valid Format Of Ordered Items For JSON Response
     const ordered_items = items
       .filter(one_item => one_item.clothing)
       .map(one_item => {
+        const selected_rating = all_ratings.find(one_rating => one_rating.clothing_id === one_item.clothing.id) // Gets The Selected Rating
+
         return {
           id: one_item.clothing.id,
           title: one_item.clothing.title,
           description: one_item.clothing.description,
           price: one_item.price_at_purchase,
           quantity: one_item.quantity,
-          image: one_item.clothing.image ? one_item.clothing.image : null
+          image: one_item.clothing.image ? one_item.clothing.image : null,
+          selected_rating: selected_rating ? selected_rating.rating : 0
         }
       })
     
@@ -719,6 +728,81 @@ app.get("/api/ordered-items/:id", async (req, res) => { // Zmenené z POST na GE
     return res.status(500).json({
       success: false,
       message: "Pri hľadaní položiek objednávky došlo k chybe."
+    })
+  }
+})
+
+// Sends The Rating
+app.post("/api/send-rating", async (req, res) => {
+  try {
+    const { tracking_code, all_ratings } = req.body // Gets The Data
+
+    if(!tracking_code || !all_ratings || all_ratings.length === 0) {
+      return res.status(400).json({
+        success: false, 
+        message: "Pri pridávaní hodnotenia došlo k chybe."
+      })
+    }
+
+    // Gets The Order
+    const order = await prisma.order.findFirst({
+      where: {
+        tracking_code: tracking_code.toUpperCase(),
+        status: "COMPLETED"
+      }
+    })
+
+    if(!order) {
+      return res.status(404).json({
+        success: false, 
+        message: "Objednávka neexistuje alebo ešte nebola doručená."
+      })
+    }
+
+    for(const one_item of all_ratings) {
+      const clothing_id = one_item.clothing_id // Gets The Clothing ID
+      const rating = one_item.rating // Gets The Rating
+
+      // Gets The Alreasy Existing Rating
+      const existing_rating = await prisma.rating.findFirst({
+        where: {
+          order_id: order.id,
+          clothing_id: clothing_id
+        }
+      })
+
+      // Creates Or Updates The Rating
+      if(existing_rating) {
+        await prisma.rating.update({
+          where: { id: existing_rating.id },
+          data: { rating: rating }
+        })
+      } 
+      
+      else {
+        await prisma.rating.create({
+          data: {
+            order_id: order.id,
+            clothing_id: clothing_id,
+            rating: rating
+          }
+        })
+      }
+    }
+
+    return res.status(200).json({
+      success: true, 
+      message: "Hodnotenia boli úspešne odoslané."
+    })
+
+  } 
+  
+  catch(error) {
+    console.error(error) // Shows The Error
+
+    return res.status(500).json({
+      success: false, 
+      message: "Pri pridávaní hodnotenia došlo k chybe."
     })
   }
 })
@@ -808,7 +892,7 @@ app.post("/api/validate-coupon", async (req, res) => {
     // Gets The Coupon
     const coupon = await prisma.coupon.findUnique({
       where: {
-        code: coupon_code
+        code: coupon_code.toUpperCase()
       }
     })
 

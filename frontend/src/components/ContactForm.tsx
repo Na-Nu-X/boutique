@@ -92,7 +92,7 @@ export default function ContactForm() {
                     type="text" 
                     name="first_name" 
                     placeholder="Meno" 
-                    max-length="20" 
+                    maxLength={20}
                     required 
                     value={contact_form.first_name}
                     onChange={handleInputChange}
@@ -102,7 +102,7 @@ export default function ContactForm() {
                     type="text" 
                     name="last_name" 
                     placeholder="Priezvisko" 
-                    max-length="50" 
+                    maxLength={50} 
                     required 
                     value={contact_form.last_name}
                     onChange={handleInputChange}
@@ -113,7 +113,7 @@ export default function ContactForm() {
                 type="email" 
                 name="email_address" 
                 placeholder="E-mail" 
-                max-length="50" 
+                maxLength={50} 
                 required 
                 value={contact_form.email_address}
                 onChange={handleInputChange}
@@ -123,7 +123,7 @@ export default function ContactForm() {
                 name="message" 
                 placeholder="Správa..." 
                 rows={5}
-                max-length="250"
+                maxLength={250}
                 required
                 value={contact_form.message || ""}
                 onChange={handleInputChange}

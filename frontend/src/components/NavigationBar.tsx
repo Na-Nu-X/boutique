@@ -215,7 +215,7 @@ export default function NavigationBar({ cart, setCart }:NavigationBarProps) {
       const response:Response = await fetch(`${BACKEND_URL}/api/validate-coupon`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ coupon_code }),
+        body: JSON.stringify({ coupon_code: coupon_code.toUpperCase() }),
       })
 
       const validate_coupon_response:ValidateCouponResponse = await response.json() // Gets The Response Data
@@ -380,7 +380,7 @@ export default function NavigationBar({ cart, setCart }:NavigationBarProps) {
   return (
     <div>
       <nav className="navigation_bar">
-        <h2 className="logo">Butik</h2>
+        <h2 className="logo" onClick={() => window.location.reload()}>Butik</h2>
         
         <ul className="links">
           <li>
@@ -471,7 +471,7 @@ export default function NavigationBar({ cart, setCart }:NavigationBarProps) {
                     type="text" 
                     name="first_name" 
                     placeholder="Meno" 
-                    max-length="20" 
+                    maxLength={20}
                     required 
                     value={customer.first_name}
                     onChange={handleInputChange}
@@ -481,7 +481,7 @@ export default function NavigationBar({ cart, setCart }:NavigationBarProps) {
                     type="text" 
                     name="last_name" 
                     placeholder="Priezvisko" 
-                    max-length="50" 
+                    maxLength={50} 
                     required 
                     value={customer.last_name}
                     onChange={handleInputChange}
@@ -493,7 +493,7 @@ export default function NavigationBar({ cart, setCart }:NavigationBarProps) {
                     type="text" 
                     name="address" 
                     placeholder="Adresa" 
-                    max-length="100" 
+                    maxLength={100} 
                     required 
                     value={customer.address}
                     onChange={handleInputChange}
@@ -503,7 +503,7 @@ export default function NavigationBar({ cart, setCart }:NavigationBarProps) {
                     type="text" 
                     name="city" 
                     placeholder="Mesto" 
-                    max-length="50" 
+                    maxLength={50} 
                     required 
                     value={customer.city}
                     onChange={handleInputChange}
@@ -514,7 +514,7 @@ export default function NavigationBar({ cart, setCart }:NavigationBarProps) {
                   type="tel" 
                   name="phone_number" 
                   placeholder="Telefón" 
-                  max-length="50" 
+                  maxLength={50} 
                   required 
                   value={customer.phone_number}
                   onChange={handleInputChange}
@@ -524,7 +524,7 @@ export default function NavigationBar({ cart, setCart }:NavigationBarProps) {
                   name="message" 
                   placeholder="Správa..." 
                   rows={5}
-                  max-length="100"
+                  maxLength={100}
                   value={customer.message || ""}
                   onChange={handleInputChange}
                 >
@@ -536,7 +536,7 @@ export default function NavigationBar({ cart, setCart }:NavigationBarProps) {
                   type="text" 
                   name="coupon_code" 
                   placeholder="Zľavový kupón" 
-                  max-length="50" 
+                  maxLength={50} 
                   disabled={applied_coupon ? true : false}
                   value={coupon_code}
                   onChange={(event:React.ChangeEvent<HTMLInputElement>) => setCouponCode(event.target.value)}
