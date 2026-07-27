@@ -38,7 +38,13 @@ interface OrderedItem {
     description:string,
     price:number,
     quantity:number,
-    image:string,
+    
+    images:{
+        id:number,
+        url:string,
+        alt_text:string
+    }[],
+
     selected_rating?:number,
     hovered_rating?:number
 }
@@ -216,7 +222,7 @@ export default function Order() {
                     {order_details.status === "CANCELLED" && (<h2 className="subheading" style={{ color: "#df3535" }}>Objednávka bola zrušená!</h2>)}
 
                     {order_details.status !== "COMPLETED" && order_details.status !== "CANCELLED" && (
-                        <p className="message">Ďakujeme { order_details.first_name } za tvoju objednávku. Naši kuchári sa už pustili do práce a tvoje jedlo bude čoskoro na ceste. Objednávka bude doručená na { order_details.address }, { order_details.city }.</p>
+                        <p className="message">Ďakujeme { order_details.first_name } za tvoju objednávku. Objednávka bude doručená na { order_details.address }, { order_details.city }.</p>
                     )}
 
                     {order_details.cash_on_delivery && order_details.status !== "COMPLETED" && (
@@ -232,7 +238,7 @@ export default function Order() {
                     )}
 
                     <div className="middle">
-                        {order_details.status === "COMPLETED" && (<h2>Ako Vám chutilo?</h2>)}
+                        {order_details.status === "COMPLETED" && (<h2>Ako ste spokojný?</h2>)}
 
                         {order_details.status === "COMPLETED" && ordered_items && ordered_items.length > 0 && (
                             <div 
@@ -241,7 +247,7 @@ export default function Order() {
                             >
                                 {ordered_items.map((one_item:OrderedItem, index:number) => (
                                     <div className="one_item" key={one_item.id || index} onClick={() => changeCartItem(one_item.id)}>
-                                        <img src={`http://localhost:5000${one_item.image}`} alt={one_item.title} />
+                                        <img src={`http://localhost:5000${one_item.images[0].url}`} alt={one_item.title} />
                         
                                         <p className="title">{ one_item.title }</p>
 

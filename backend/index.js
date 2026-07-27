@@ -111,6 +111,7 @@ app.get("/api/clothing", async(req, res) => {
     // Gets All The Clothing
     const clothing = await prisma.clothing.findMany({
       include: {
+        images: true,
         category: true,
         ratings: true,
 
@@ -132,18 +133,27 @@ app.get("/api/clothing", async(req, res) => {
         average_rating = Math.round((sum / rating_amount) * 10) / 10 // Gets The Average Rating
       }
 
-      // Stores The Modifier Groups Data
-      const modifier_groups_data = one_clothing.modifier_groups.map((group) => {
+      // Stores The Images Data
+      const images_data = one_clothing.images.sort((a, b) => a.sort_order - b.sort_order).map((one_image) => {
         return {
-          id: group.id,
-          title: group.title,
-          is_multiple_choice: group.is_multiple_choice,
-          is_required: group.is_required,
+          id: one_image.id,
+          url: one_image.url,
+          alt_text: one_image.alt_text || null
+        }
+      })
 
-          items: group.items.map((item) => ({
-            id: item.id,
-            title: item.title,
-            extra_price: item.extra_price
+      // Stores The Modifier Groups Data
+      const modifier_groups_data = one_clothing.modifier_groups.map((one_group) => {
+        return {
+          id: one_group.id,
+          title: one_group.title,
+          is_multiple_choice: one_group.is_multiple_choice,
+          is_required: one_group.is_required,
+
+          items: one_group.items.map((one_item) => ({
+            id: one_item.id,
+            title: one_item.title,
+            extra_price: one_item.extra_price
           }))
         }
       })
@@ -154,7 +164,7 @@ app.get("/api/clothing", async(req, res) => {
         description: one_clothing.description,
         category_id: one_clothing.categoryId || undefined, // Zmeníme categoryId na category_id
         price: one_clothing.price,
-        image: one_clothing.image,
+        images: images_data,
         average_rating: average_rating,
         rating_amount: rating_amount,
         modifier_groups: modifier_groups_data,
@@ -200,6 +210,12 @@ app.post("/api/cart-items", async(req, res) => {
       },
 
       include: {
+        images: {
+          orderBy: {
+            sort_order: "asc"
+          }
+        },
+        
         modifier_groups: {
           include: {
             items: true
@@ -696,7 +712,15 @@ app.post("/api/ordered-items/:id", async (req, res) => { // Zmenené z POST na G
       },
 
       include: {
-        clothing: true
+        clothing: {
+          include: {
+            images: {
+              orderBy: {
+                sort_order: "asc"
+              }
+            }
+          }
+        }
       }
     })
 
@@ -710,6 +734,15 @@ app.post("/api/ordered-items/:id", async (req, res) => { // Zmenené z POST na G
     const ordered_items = items
       .filter(one_item => one_item.clothing)
       .map(one_item => {
+        // Stores The Images Data
+        const images_data = (one_item.clothing.images || []).map((one_image) => {
+          return {
+            id: one_image.id,
+            url: one_image.url,
+            alt_text: one_image.alt_text || null
+          }
+        })
+
         const selected_rating = all_ratings.find(one_rating => one_rating.clothing_id === one_item.clothing.id) // Gets The Selected Rating
 
         return {
@@ -718,7 +751,7 @@ app.post("/api/ordered-items/:id", async (req, res) => { // Zmenené z POST na G
           description: one_item.clothing.description,
           price: one_item.price_at_purchase,
           quantity: one_item.quantity,
-          image: one_item.clothing.image ? one_item.clothing.image : null,
+          images: images_data,
           selected_rating: selected_rating ? selected_rating.rating : 0
         }
       })

@@ -2,8 +2,6 @@
 @use '../styles/partials/mixins';
 
 .catalog {
-    min-height: 100vh;
-
     .all_products {
         @include mixins.scrollbar;
         display: grid;
@@ -20,11 +18,9 @@
         overflow-y: auto; 
     
         .one_product {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
             width: 100%;
-            padding: 15px;
+            max-height: 569.67px;
+            padding: 5px;
             background-color: variables.$secondary-color; 
             border-radius: variables.$medium-border-radius;
             box-shadow: 0 4px 6px transparentize(variables.$main-color, 0.92), 0 2px 4px transparentize(variables.$main-color, 0.95);
@@ -35,120 +31,193 @@
                 box-shadow: 0 10px 20px transparentize(variables.$main-color, 0.82), 0 4px 6px transparentize(variables.$main-color, 0.88);
                 cursor: pointer;
             }
-    
-            .rating {
-                display: inline-flex;
-                align-items: center;
-                justify-content: flex-end;
-                gap: 5px; 
-                margin-left: auto; 
-                padding: 5px 10px;
-                background-color: transparentize(variables.$dark-green-color, 0.9);
-                border-radius: variables.$big-border-radius;
-            
-                .fa-star {
-                    color: variables.$dark-green-color;
-                    font-size: 1.2em;
-                }
-            
-                .average {
-                    color: variables.$main-color;
-                    font-weight: 700;
-                }
-            
-                .amount {
-                    font-size: 0.8em;
-                    font-weight: 500;
-                    color: transparentize(variables.$main-color, 0.4);
-                }
-            }
-    
-            img {
-                max-width: 100%;
-                width: 100%;
-                aspect-ratio: 1 / 1;
-                object-fit: cover;
-                object-position: center;
-                border-radius: variables.$medium-border-radius;
-            }
-    
-            .title {
-                margin-bottom: 10px;
-                text-align: center;
-                font-family: variables.$heading-font;
-                font-size: 2em;
-                font-weight: bold;
-            }
-    
-            .description {
-                display: -webkit-box;
-                line-clamp: 4;
-                -webkit-line-clamp: 4;
-                -webkit-box-orient: vertical;
-                color: transparentize(variables.$main-color, 0.2);
-                overflow: hidden;
-            
-                &::first-letter {
-                    margin-right: 10px;
-                    initial-letter: 2;
-                    font-weight: bold;
-                }
-            }
 
-            .modifier_group {
+            .one_product_container {
+                @include mixins.scrollbar;
                 display: flex;
                 flex-direction: column;
-                gap: 5px;
-                margin-top: 10px;
-                padding-top: 10px;
-                border-top: 1px solid darken(variables.$secondary-color, 6%);
+                gap: 10px;
+                width: 100%;
+                max-height: 569.67px - 10px;
+                padding: 10px;
+                overflow-y: auto;
     
-                > p {
-                    margin: 0px;
-                    color: variables.$main-color;
-                    font-weight: 600;
-    
-                    .required {
-                        color: variables.$red-color;
+                .rating {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: flex-end;
+                    gap: 5px; 
+                    margin-left: auto; 
+                    padding: 5px 10px;
+                    background-color: transparentize(variables.$dark-green-color, 0.9);
+                    border-radius: variables.$big-border-radius;
+                
+                    .fa-star {
+                        color: variables.$dark-green-color;
+                        font-size: 1.2em;
+                    }
+                
+                    .average {
+                        color: variables.$main-color;
+                        font-weight: 700;
+                    }
+                
+                    .amount {
+                        font-size: 0.8em;
+                        font-weight: 500;
+                        color: transparentize(variables.$main-color, 0.4);
+                    }
+                }
+
+                .images_container {
+                    position: relative;
+                    flex-shrink: 0;
+                    border: 1px solid transparentize(variables.$main-color, 0.8);
+                    border-radius: variables.$medium-border-radius;
+                    overflow: hidden;
+                
+                    .images {
+                        display: flex;
+                        width: 100%;
+                        transition: transform 0.3s ease-in-out;
+                        
+                        img {
+                            min-width: 100%;
+                            aspect-ratio: 1 / 1;
+                            object-fit: cover;
+                            object-position: center;
+                        }
+                    }
+                
+                    .bars {
+                        position: absolute;
+                        bottom: 10px;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        display: flex;
+                        justify-content: center;
+                        gap: 10px;
+                        width: 100%;
+                        z-index: 50;
+                
+                        .one_bar {
+                            width: 10px;
+                            height: 10px;
+                            background: darken(variables.$secondary-color, 5%);
+                            border-radius: variables.$medium-border-radius;
+                            cursor: pointer;
+                            transition: background-color 0.3s ease, transform 0.2s ease;
+                
+                            &.active,
+                            &:hover {
+                                background: darken(variables.$secondary-color, 10%);
+                                transform: scale(1.2);
+                            }
+                        }
+                    }
+                }
+        
+                .title {
+                    margin-bottom: 10px;
+                    text-align: center;
+                    font-family: variables.$heading-font;
+                    font-size: 2em;
+                    font-weight: bold;
+                }
+        
+                .description {
+                    flex-shrink: 0;
+                    display: -webkit-box;
+                    line-clamp: 4;
+                    -webkit-line-clamp: 4;
+                    -webkit-box-orient: vertical;
+                    color: transparentize(variables.$main-color, 0.2);
+                    overflow: hidden;
+                
+                    &::first-letter {
+                        margin-right: 10px;
+                        initial-letter: 2;
                         font-weight: bold;
                     }
                 }
-    
-                .modifier_item {
+
+                .modifier_group {
                     display: flex;
-                    align-items: center;
-                    padding: 5px 10px;
-                    background-color: darken(variables.$secondary-color, 3%);
-                    border: 1px solid darken(variables.$secondary-color, 10%);
-                    border-radius: variables.$small-border-radius;
-                    user-select: none;
-                    cursor: pointer;
-                    transition: background-color 0.2s ease, transform 0.1s ease;
-    
-                    &:hover {
-                        background-color: variables.$secondary-color;
-                    }
-    
-                    &:active {
-                        transform: scale(0.98);
-                    }
-    
-                    input[type="checkbox"],
-                    input[type="radio"] {
-                        width: 15px;
-                        height: 15px;
-                        accent-color: variables.$dark-green-color;
-                        cursor: pointer;
-                    }
-    
-                    span {
-                        margin-left: 10px;
+                    flex-direction: column;
+                    gap: 5px;
+                    margin-top: 10px;
+                    padding-top: 10px;
+                    border-top: 1px solid darken(variables.$secondary-color, 6%);
+        
+                    > p {
+                        margin: 0px;
                         color: variables.$main-color;
+                        font-weight: 600;
+        
+                        .required {
+                            margin-left: 5px;
+                            color: variables.$red-color;
+                            font-weight: bold;
+                        }
                     }
-    
+        
+                    .modifier_item {
+                        display: flex;
+                        align-items: center;
+                        padding: 5px 10px;
+                        background-color: darken(variables.$secondary-color, 3%);
+                        border: 1px solid darken(variables.$secondary-color, 10%);
+                        border-radius: variables.$small-border-radius;
+                        user-select: none;
+                        cursor: pointer;
+                        transition: background-color 0.2s ease, transform 0.1s ease;
+        
+                        &:hover {
+                            background-color: variables.$secondary-color;
+                        }
+        
+                        &:active {
+                            transform: scale(0.98);
+                        }
+        
+                        input[type="checkbox"],
+                        input[type="radio"] {
+                            width: 15px;
+                            height: 15px;
+                            accent-color: variables.$dark-green-color;
+                            cursor: pointer;
+                        }
+        
+                        span {
+                            margin-left: 10px;
+                            color: variables.$main-color;
+                        }
+        
+                        .price {
+                            margin-left: auto;
+                            font-size: 0.9em;
+                            font-weight: bold;
+                            line-height: 1;
+                        
+                            span {
+                                font-size: 0.6em;
+                                vertical-align: super;
+                                margin-left: 2px;
+                            }
+                        }
+                    }
+                }
+        
+                .bottom {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    width: 100%;
+                    margin-top: auto;
+                    padding-top: 10px;
+        
                     .price {
-                        margin-left: auto;
-                        font-size: 0.9em;
+                        font-size: 1.2em;
                         font-weight: bold;
                         line-height: 1;
                     
@@ -158,49 +227,28 @@
                             margin-left: 2px;
                         }
                     }
-                }
-            }
-    
-            .bottom {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                width: 100%;
-                margin-top: auto;
-                padding-top: 10px;
-    
-                .price {
-                    font-size: 1.2em;
-                    font-weight: bold;
-                    line-height: 1;
+        
+                    .add_to_cart {
+                        all: unset;
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
+                        padding: 10px 15px;
+                        background-color: lighten(variables.$main-color, 15%);
+                        color: variables.$secondary-color; 
+                        border-radius: variables.$small-border-radius;
+                        font-weight: bold;
+                        font-size: 0.9em;
+                        cursor: pointer;
+                        transition: background-color 0.2s ease, transform 0.1s ease;
                 
-                    span {
-                        font-size: 0.6em;
-                        vertical-align: super;
-                        margin-left: 2px;
-                    }
-                }
-    
-                .add_to_cart {
-                    all: unset;
-                    display: flex;
-                    align-items: center;
-                    gap: 10px;
-                    padding: 10px 15px;
-                    background-color: lighten(variables.$main-color, 15%);
-                    color: variables.$secondary-color; 
-                    border-radius: variables.$small-border-radius;
-                    font-weight: bold;
-                    font-size: 0.9em;
-                    cursor: pointer;
-                    transition: background-color 0.2s ease, transform 0.1s ease;
-            
-                    &:hover {
-                        background-color: variables.$main-color;
-                    }
-            
-                    &:active {
-                        transform: scale(0.95);
+                        &:hover {
+                            background-color: variables.$main-color;
+                        }
+                
+                        &:active {
+                            transform: scale(0.95);
+                        }
                     }
                 }
             }

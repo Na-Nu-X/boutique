@@ -47,12 +47,23 @@ model Clothing {
   category        Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   categoryId      Int?      @map("category_id")
   price           Int       @default(0)
-  image           String
+  images          Image[]
   modifier_groups ClothingModifierGroup[]
   order_items     OrderItem[]
   ratings         Rating[]
 
   @@map("clothing")
+}
+
+model Image {
+  id          Int       @id @default(autoincrement())
+  clothing_id Int
+  clothing    Clothing  @relation(fields: [clothing_id], references: [id], onDelete: Cascade)
+  url         String
+  alt_text    String?
+  sort_order  Int       @default(0)
+
+  @@map("image")
 }
 
 model FilterGroup {
