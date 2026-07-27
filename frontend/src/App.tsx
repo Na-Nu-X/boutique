@@ -77,7 +77,8 @@ export default function App() {
 
   // Stores The Cart To The Local Storage
   useEffect(() => {
-    localStorage.setItem("cart", JSON.stringify(cart)) // Stores The Cart
+    if(cart.length === 0) localStorage.removeItem("cart") // Removes The Cart
+    else localStorage.setItem("cart", JSON.stringify(cart)) // Stores The Cart
   }, [cart])
 
   // Function For Add The Item To The Cart
@@ -135,7 +136,7 @@ export default function App() {
             <Route path="/platba-uspesna" element={
               <div>
                 <NavigationBar cart={cart} setCart={setCart} />
-                <SuccessPayment />
+                <SuccessPayment setCart={setCart} />
                 <Footer />
               </div>
             } />
@@ -143,7 +144,7 @@ export default function App() {
             <Route path="/objednavka-uspesna" element={
               <div>
                 <NavigationBar cart={cart} setCart={setCart} />
-                <SuccessOrder />
+                <SuccessOrder setCart={setCart} />
                 <Footer />
               </div>
             } />

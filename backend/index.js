@@ -11,6 +11,74 @@ const nodemailer = require("nodemailer")
 
 const prisma = new PrismaClient()
 
+// Stripe Webhook
+app.post("/api/stripe/webhook", express.raw({ type: "application/json" }), async (req, res) => {
+    const sig_header = req.headers["stripe-signature"] // Gets The Stripe Signature
+    const endpoint_secret = process.env.STRIPE_WEBHOOK_SECRET // Gets The Stripe Webhook Secret
+
+    let event
+
+    try {
+      event = stripe.webhooks.constructEvent(req.body, sig_header, endpoint_secret) // Creates The Event
+    } 
+    
+    catch {
+      console.error("Chyba v Stripe Webhook.") // Shows The Error Message
+      return res.status(400).send("Chyba v Stripe Webhook.")
+    }
+
+    const checkout_session = event.data.object // Gets The Checkout Session
+
+    // Gets The Order ID
+    const order_id = checkout_session.metadata?.order_id 
+      ? parseInt(checkout_session.metadata.order_id) 
+      : null
+
+    // Checkout
+    if(event.type === "checkout.session.completed") {
+      if(order_id) {
+        try {
+          // Updates The Order Status
+          await prisma.order.update({
+            where: { id: order_id },
+            data: { status: "PAID" }
+          })
+        } 
+        
+        catch {
+          console.error("Pri označovaní platby za zaplatenú došlo k chybe.") // Shows The Error Message
+        }
+      }
+    }
+
+    // Expired Checkout
+    if(event.type === "checkout.session.expired") {
+      if(order_id) {
+        try {
+          // Gets The Order
+          const order = await prisma.order.findUnique({
+            where: { id: order_id }
+          })
+
+          // Updates The Order Status
+          if(order && order.status === "PENDING") {
+            await prisma.order.update({
+              where: { id: order_id },
+              data: { status: "CANCELLED" }
+            })
+          }
+        } 
+        
+        catch {
+          console.error("Pri označovaní platby za zrušenú došlo k chybe.") // Shows The Error Message
+        }
+      }
+    }
+
+    res.json({ received: true })
+  }
+)
+
 app.use(cors())
 app.use(express.json())
 app.use("/uploads", express.static("uploads")) // Defines The Image Upload Path

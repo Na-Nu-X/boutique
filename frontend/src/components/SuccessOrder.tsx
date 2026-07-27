@@ -1,6 +1,19 @@
-export default function SuccessOrder() {
+import { useEffect } from "react"
+
+import type { CartItem } from "../App"
+
+interface SuccessOrderProps {
+    setCart: React.Dispatch<React.SetStateAction<CartItem[]>>
+}
+
+export default function SuccessOrder({ setCart }:SuccessOrderProps) {
     const query_params:URLSearchParams = new URLSearchParams(window.location.search) // Gets The Query Params
     const tracking_code:string|null = query_params.get("code") || null // Gets The Tracking Code
+
+    // Removes All Items From The Cart
+    useEffect(() => {
+        setCart([])
+    }, [setCart])
 
     return (
         <div className="success_container">

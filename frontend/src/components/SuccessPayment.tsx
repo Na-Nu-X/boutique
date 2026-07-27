@@ -1,9 +1,21 @@
 // @ts-ignore
 import "./SuccessPayment.scss"
+import { useEffect } from "react"
 
-export default function SuccessPayment() {
+import type { CartItem } from "../App"
+
+interface SuccessPaymentProps {
+    setCart: React.Dispatch<React.SetStateAction<CartItem[]>>
+}
+
+export default function SuccessPayment({ setCart }:SuccessPaymentProps) {
     const query_params:URLSearchParams = new URLSearchParams(window.location.search) // Gets The Query Params
     const tracking_code:string|null = query_params.get("code") || null // Gets The Tracking Code
+
+    // Removes All Items From The Cart
+    useEffect(() => {
+        setCart([])
+    }, [setCart])
 
     return (
         <div className="success_container">
