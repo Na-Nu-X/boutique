@@ -119,6 +119,22 @@ export default function NavigationBar({ cart, setCart }:NavigationBarProps) {
     else cart_modal.close() // Closes The Cart Modal
   }, [is_cart_open])
 
+  // Function For Scroll To The Selected Element
+  const scrollTo = (selector:string) => {
+    const element:HTMLElement|null = document.querySelector(selector) as HTMLElement || null // Gets The Element
+
+    if(element) {
+      let offset:number = 60 // Stores The Offset
+      
+      if(element.classList.contains("all_products")) offset = 65 // Sets The Offset (Navigation Bar)
+      if(element.classList.contains("contact_form")) offset = 65 + 20 // Sets The Offset (Navigation Bar + Padding)
+
+      const element_position:number = element.getBoundingClientRect().top + window.scrollY // Gets The Element's Position
+
+      window.scrollTo({ top: element_position - offset, behavior: "smooth" }) // Starts The Scroll Animation
+    }
+  }
+
   // Function For Save The Customer's Delivery Data To The Local Storage
   const saveCustomerToStorage = () => {
     localStorage.setItem("customer", JSON.stringify(customer)) // Saves The Customer Data To The Local Storage
@@ -414,13 +430,8 @@ export default function NavigationBar({ cart, setCart }:NavigationBarProps) {
             <a href="/" aria-label="Domov">Domov</a>
           </li>
   
-          <li>
-            <a href="/produkty" aria-label="Produkty">Produkty</a>
-          </li>
-  
-          <li>
-            <a href="/kontakt" aria-label="Kontakt">Kontakt</a>
-          </li>
+          <li onClick={() => scrollTo(".all_products")}>Produkty</li>
+          <li onClick={() => scrollTo('.contact_form')}>Kontakt</li>
         </ul>
   
         <div className="cart">

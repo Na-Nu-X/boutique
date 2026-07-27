@@ -13,7 +13,7 @@ export default function SuccessOrder() {
                     <div>
                         <h1>Objednávka bola prijatá!</h1>
                         <h2 className="tracking_code">Kód: {tracking_code}</h2>
-                        <p>Ďakujeme za tvoju objednávku. Naši kuchári sa už pustili do práce a tvoje jedlo bude čoskoro na ceste.</p>
+                        <p>Ďakujeme za tvoju objednávku. Tvoja zásielka bude čoskoro na ceste.</p>
                     </div>
                 )}
 

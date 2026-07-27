@@ -9,6 +9,14 @@
     min-height: 100vh;
     padding: 0px 20px;
 
+    &::before {
+        @include mixins.circle_decoration($top: -150px, $right: -100px, $width: 400px, $height: 400px, $color: transparentize(variables.$green-color, 0.95))
+    }
+
+    &::after {
+        @include mixins.circle_decoration($top: 0px, $left: -100px, $width: 400px, $height: 400px, $color: transparentize(variables.$green-color, 0.95))
+    }
+
     .text {
         @include mixins.flex_center($direction: column);
 
@@ -25,45 +33,6 @@
             color: variables.$green-color;
         }
     }
-
-    // .image {
-    //     --frame-width: 10px;
-    //     --frame-gap: 5px;
-
-    //     position: relative;
-    //     padding: var(--frame-width) var(--frame-width) var(--frame-width) 0px;
-    //     background-color: variables.$green-color;
-    //     border-radius: variables.$medium-border-radius;
-
-    //     &:before {
-    //         content: "";
-    //         position: absolute;
-    //         top: 0px;
-    //         left: 0px;
-    //         width: calc(100% / 3);
-    //         height: var(--frame-width);
-    //         background-color: variables.$light-green-color;
-    //     }
-
-    //     &:after {
-    //         content: "";
-    //         position: absolute;
-    //         bottom: 0px;
-    //         left: 0px;
-    //         width: calc(100% / 3);
-    //         height: var(--frame-width);
-    //         background-color: variables.$light-green-color;
-    //     }
-        
-    //     img {
-    //         display: block;
-    //         max-width: 500px;
-    //         width: 100%;
-    //         padding: var(--frame-gap) var(--frame-gap) var(--frame-gap) 0px;
-    //         background-color: variables.$light-green-color;
-    //         border-radius: 0px variables.$medium-border-radius variables.$medium-border-radius 0px;
-    //     }
-    // }
 
     .image {
         --frame-width: 10px;

@@ -1,4 +1,5 @@
 @use './styles/partials/variables';
+@use './styles/partials/mixins';
 
 *, *::before, *::after {
   margin: 0px;
@@ -7,7 +8,9 @@
 }
 
 body {
+  @include mixins.scrollbar;
   background-color: variables.$light-green-color;
   font-family: variables.$main-font;
   font-size: 15px;
+  overflow-x: hidden;
 }

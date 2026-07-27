@@ -38,7 +38,7 @@ interface OrderedItem {
     description:string,
     price:number,
     quantity:number,
-    
+
     images:{
         id:number,
         url:string,
@@ -169,7 +169,7 @@ export default function Order() {
             }))
 
         if(all_ratings.length === 0) {
-            alert("Pred odoslaním ohodnoť aspoň jedno jedlo.") // Shows The Alert
+            alert("Pred odoslaním ohodnoť aspoň jednu položku.") // Shows The Alert
             return
         }
 
